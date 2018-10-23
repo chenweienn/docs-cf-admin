@@ -256,15 +256,15 @@ In this example, you can reclaim 2395450 bytes by pruning unused volumes.
 
 ### <a id="making-space"></a> How GrootFS Reclaims Disk Space
 
-The thresholder component calculates and sets a value so that GrootFS's garbage collector can ensure that
-a small reserved space is kept free for other jobs.
+The thresholder component calculates and sets a value so that GrootFS's garbage collector can attempt to ensure 
+that a small reserved space is kept free for other jobs.
 GrootFS only tries to garbage collect or reclaim space when that threshold is reached.
 However, if all the rootfs layers are actively in use by images, then garbage collection cannot occur and that space is used up.
 
 If you determine that there is not enough reclaimable disk and more space is needed on disk, 
 you should scale up your VMs to provide more disk space. 
 
-Another option is to set the GrootFS `reserved_space_for_other_jobs_in_mb` property to a higher value.
+Alternatively, you can set the GrootFS `reserved_space_for_other_jobs_in_mb` property to a higher value.
 
 ## <a id="categories"></a> Other Categories of GrootFS Disk Usage
 
