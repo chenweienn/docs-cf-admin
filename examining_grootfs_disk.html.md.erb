@@ -1,5 +1,5 @@
 ---
-title: Managing GrootFS Disk Usage
+title: Examining GrootFS Disk Usage
 owner: Garden
 ---
 
@@ -129,7 +129,7 @@ To check the disk usage of all running containers, perform the following steps:
 
 Underlying layers are known as `volumes` in GrootFS. 
 
-They are read-only and their changesets are layered together through an overlay mount to create the rootfs for containers.
+They are read-only and their changesets are layered together through an **OverlayFS** mount to create the rootfs for containers.
 When GrootFS writes each file system volume to disk, it also stores the number of bytes written to a file in the `meta` directory.
 
 ### <a id="volume-check"></a> Check Volume Disk Size
@@ -176,20 +176,9 @@ or run `du` on the volume itself. Perform the following steps:
     5.4M    /var/vcap/data/grootfs/store/unprivileged/volumes/VOLUME-SHA/
     </pre>
 
-## <a id="free-space"></a> Estimate and Free Up Disk Space
+## <a id="free-space"></a> Determine Disk Usage and Reclaimable Disk Space
 
-If more space is needed on disk, one option is to set the  GrootFS `reserved_space_for_other_jobs_in_mb` property to a higher value.
-
-How much space is freed depends on how many volumes are actively in use by images. 
-GrootFS stores are initialized to use the entire `/var/vcap/data`.
-If the `reserved_space_for_other_jobs_in_mb` is not set high enough, or if there are many images with few shared volumes, 
-GrootFS could use it all.
-
-The thresholder calculates and sets a value so that GrootFS's garbage collector tries to ensure that a small reserved space is kept free for other jobs.
-GrootFS only tries to garbage collect when that threshold is reached.
-However, if all the rootfs layers are actively in use by images, then garbage collection cannot occur and that space is used.
-
-To estimate how much free space you can reclaim by pruning unused volumes, see [Calculating Reclaimable Disk](#pruning-volumes).
+This section describes how to calculate the amount of disk space is in use and estimate how much space is reclaimable.
 
 ### <a id="active-volumes"></a> Calculate Disk Use by All Active Volumes
 
@@ -235,10 +224,10 @@ df | grep -E  "/var/vcap/data/grootfs/store/(privileged|unprivileged)$" \
 
 The command above returns the total number of bytes used by the store.
 
-### <a id="pruning-volumes"></a> Calculate Reclaimable Disk
+### <a id="pruning-volumes"></a> Calculate Reclaimable Disk Space
 
-You can use values gathered from the commands above to calculate how much space can be cleared by a force clean in GrootFS.
-A force clean reclaims disk space by pruning unused volumes.
+You can use values gathered from the commands above to calculate how much space can be cleared in GrootFS.
+Garbage collection reclaims disk space by pruning unused volumes.
 
 The overall formula to calculate reclaimable disk space is to subtract the total disk in use by the store from the total disk used by active volumes.
 
@@ -264,6 +253,18 @@ For example, your result might be:
     ```
 
 In this example, you can reclaim 2395450 bytes by pruning unused volumes.
+
+### <a id="making-space"></a> How GrootFS Reclaims Disk Space
+
+The thresholder component calculates and sets a value so that GrootFS's garbage collector can ensure that
+a small reserved space is kept free for other jobs.
+GrootFS only tries to garbage collect or reclaim space when that threshold is reached.
+However, if all the rootfs layers are actively in use by images, then garbage collection cannot occur and that space is used up.
+
+If you determine that there is not enough reclaimable disk and more space is needed on disk, 
+you should scale up your VMs to provide more disk space. 
+
+Another option is to set the GrootFS `reserved_space_for_other_jobs_in_mb` property to a higher value.
 
 ## <a id="categories"></a> Other Categories of GrootFS Disk Usage
 
