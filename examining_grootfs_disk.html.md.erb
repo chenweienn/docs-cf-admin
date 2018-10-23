@@ -12,8 +12,11 @@ You run the commands in this topic on any BOSH-deployed VM that hosts the Garden
 
 <p class="note"><strong>Note:</strong> This topic provides different commands 
 depending on whether you are using privileged or unprivileged containers in your deployment. 
+By default, all deployments use unprivileged containers. 
 For more information about these container types, 
 see <a href="../concepts/container-security.html#security">Container Security</a>.</p>
+
+For more information about the GrootFS concepts, see [Understanding GrootFS Disk Usage](../concepts/grootfs-disk.html).
 
 ## <a id='space'></a> Reconcile Container Disk Usage and Host Disk Usage
 
@@ -42,6 +45,7 @@ For example, the following situations can occur:
 ## <a id='disk_usage'></a> About Container Disk Usage
 
 On disk, the read-write layer for each container can be found at `/var/vcap/data/grootfs/store/unprivileged/images/CONTAINER-ID/diff`.
+
 When GrootFS calls on the built-in XFS quota tooling to get disk usage for a container, 
 it takes into account data written to that directory and not the data in the read-only volumes.
 
@@ -252,7 +256,7 @@ For example, your result might be:
     5607885 - 3212435 = 2395450 bytes
     ```
 
-In this example, you can reclaim 2395450 bytes by pruning unused volumes.
+In this example, you can reclaim 2395450 bytes through garbage collection.
 
 ### <a id="making-space"></a> How GrootFS Reclaims Disk Space
 
@@ -262,9 +266,9 @@ GrootFS only tries to garbage collect or reclaim space when that threshold is re
 However, if all the rootfs layers are actively in use by images, then garbage collection cannot occur and that space is used up.
 
 If you determine that there is not enough reclaimable disk and more space is needed on disk, 
-you should scale up your VMs to provide more disk space. 
+you should scale up your VMs to a larger size or add more VMs to provide more disk space. 
 
-Alternatively, you can set the GrootFS `reserved_space_for_other_jobs_in_mb` property to a higher value.
+<%= vars.grootfs_reserved_space %>
 
 ## <a id="categories"></a> Other Categories of GrootFS Disk Usage
 
